@@ -18,6 +18,7 @@ class CategorySeeder extends Seeder
             Category::factory()->create(
                 [
                     'name' => $category,
+                    'state' => 1,
                 ]
             );
         }
