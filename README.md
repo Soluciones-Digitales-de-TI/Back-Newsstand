@@ -13,5 +13,5 @@
 2. Ejecutar `php artisan key:generate` para generar la llave
 3. Despues instalar las librerias `composer install`
 4. Realizar las migraciones `php artisan migrate`
-5. Eliminar y crear la base de datos con los factories y seeders `php artisan migrate:fresh --seeed`
+5. Eliminar y crear la base de datos con los factories y seeders `php artisan migrate:fresh --seed`
 6. Levantar el servidor enbebido `php artisan serve`
