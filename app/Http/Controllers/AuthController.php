@@ -2,84 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Http\Requests\RegisterUserRequest;
-use App\Http\Requests\LoginUserRequest;
 use App\Classes\ApiResponseHelper;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\RegisterUserRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Register a new user.
+     */
     public function register(RegisterUserRequest $request)
     {
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ];
-
-        DB::beginTransaction();
         try {
-            $user = User::create($data);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            $response = [
-                'user' => $user,
-                'token' => $token,
+            $data = [
+                'access_token' => $token,
                 'token_type' => 'Bearer',
             ];
-
-            DB::commit();
-            return ApiResponseHelper::sendResponse($response, 'User created successfully', 201);
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            return ApiResponseHelper::sendResponse('An error occurred while creating user ' + $ex, 500);
+            return ApiResponseHelper::sendResponse($data, 'Record register successful.', 200);
+        } catch (Exception $ex) {
+            return ApiResponseHelper::rollback($ex);
         }
     }
 
+    /**
+     * Login user and create token.
+     */
     public function login(LoginUserRequest $request)
     {
-        $credentials = $request->only('email', 'password');
-
         try {
-            $user = User::where('email', $credentials['email'])->firstOrFail();
 
-            if (Hash::check($credentials['password'], $user->password)) {
-                $token = $user->createToken('auth_token')->plainTextToken;
-                $response = [
-                    'user' => $user,
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                ];
-                return ApiResponseHelper::sendResponse(['data' => $response], 'Login successful', 200);
-            } else {
-                return ApiResponseHelper::sendResponse('Invalid credentials', 401);
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['The provided credentials are incorrect.'],
+                ]);
             }
-        } catch (ModelNotFoundException $e) {
-            return ApiResponseHelper::sendResponse('User not found', 404);
-        } catch (\Exception $ex) {
-            return ApiResponseHelper::sendResponse('An error occurred during login ' + $ex, 500);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            $data = [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ];
+            return ApiResponseHelper::sendResponse($data, 'Login successful.', 200);
+        } catch (Exception $ex) {
+            return ApiResponseHelper::rollback($ex);
         }
     }
 
-    public function logout()
+    /**
+     * Logout user (Revoke the token).
+     */
+    public function logout(Request $request)
     {
         try {
-            auth()->user()->tokens()->delete();
-            return ApiResponseHelper::sendResponse([], 'Logout successful', 200);
-        } catch (\Exception $ex) {
-            return ApiResponseHelper::sendResponse('An error occurred during logout ' + $ex, 500);
+            $request->user()->currentAccessToken()->delete();
+            return ApiResponseHelper::sendResponse(null, 'Successfully logged out.', 200);
+        } catch (Exception $ex) {
+            return ApiResponseHelper::rollback($ex);
         }
     }
 
-    public function profile()
+    /**
+     * Show the profile of the authenticated user.
+     */
+    public function showProfile(Request $request)
     {
         try {
-            return ApiResponseHelper::sendResponse(auth()->user(), 'Profile fetched successfully', 200);
-        } catch (\Exception $ex) {
-            return ApiResponseHelper::sendResponse('An error occurred while fetching profile '+$ex, 500);
+            return ApiResponseHelper::sendResponse($request->user(), 'Get profile successful.');
+        } catch (Exception $ex) {
+            return ApiResponseHelper::rollback($ex);
+
         }
     }
 }

@@ -16,12 +16,11 @@ Route::prefix('v1')->name('api.')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('products', ProductController::class);
-
-        Route::get('/profile', [AuthController::class, 'profile']);
-        Route::get('/logout', [AuthController::class, 'logout']);
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile.show');
     });
 
 });
