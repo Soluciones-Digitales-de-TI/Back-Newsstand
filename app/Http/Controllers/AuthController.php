@@ -87,6 +87,7 @@ class AuthController extends Controller
             return ApiResponseHelper::sendResponse($request->user(), 'Get profile successful.');
         } catch (Exception $ex) {
             return ApiResponseHelper::rollback($ex);
+
         }
     }
 }
