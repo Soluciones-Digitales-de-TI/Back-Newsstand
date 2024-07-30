@@ -10,9 +10,67 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+/**
+* @OA\Info(
+*             title="API OrdersProducts", 
+*             version="1.0",
+*             description="Registros de datos intermedia de orders y pedidos"
+* )
+*
+* @OA\Server(url="http://127.0.0.1:8000/")
+*/
 class OrdersProductsController extends Controller
 {
+    /**
+     * listado de todos los registros de ordersproducts
+     * @OA\Get (
+     *     path="/api/v1/ordersproducts",
+     *     tags={"OrdersProducts"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="sucessfull",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 type="array",
+     *                 property="rows",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(
+     *                         property="id",
+     *                         type="number",
+     *                         example="1"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="order_id",
+     *                         type="BIGINT",
+     *                         example="1"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="product_id",
+     *                         type="BIGINT",
+     *                         example="1"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="cantidad",
+     *                         type="int",
+     *                         example="1"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="created_at",
+     *                         type="string",
+     *                         example="2023-02-23T00:09:16.000000Z"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="updated_at",
+     *                         type="string",
+     *                         example="2023-02-23T12:33:45.000000Z"
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 30); // Número de elementos por página
@@ -36,8 +94,44 @@ class OrdersProductsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage
-     */
+ * Crear una nueva orden de producto
+ * @OA\Post(
+ *     path="/api/v1/ordersproducts",
+ *     tags={"OrdersProducts"},
+ *     summary="Crear una nueva orden de producto",
+ *     description="Crear una nueva orden de producto en la base de datos",
+ *     operationId="storeOrderProduct",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *              required={"order_id", "product_id", "cantidad"},
+ *              @OA\Property(property="order_id", type="integer", example=1),
+ *              @OA\Property(property="product_id", type="integer", example=2),
+ *              @OA\Property(property="cantidad", type="integer", example=10)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Created",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="id", type="number", example=1),
+ *              @OA\Property(property="order_id", type="bigint", example=1),
+ *              @OA\Property(property="product_id", type="bigint", example=2),
+ *              @OA\Property(property="cantidad", type="int", example=10),
+ *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
+ *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *              @OA\Property(property="errors", type="object", example={"order_id": {"The order id field is required."}})
+ *         )
+ *     )
+ * )
+ */
     public function store(StoreOrderProductRequest $request)
     {
         // Extraer los datos del request
@@ -64,14 +158,42 @@ class OrdersProductsController extends Controller
         }
     }
 
-
     /**
-     * Display the specified resource
+     * Mostrar la información de una sola ordersproducts
+     * @OA\Get (
+     *     path="/api/v1/ordersproducts/{id}",
+     *     tags={"OrdersProducts"},
+     *     @OA\Parameter(
+     *         in="path",
+     *         name="id",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sucessfull",
+     *         @OA\JsonContent(
+     *              @OA\Property(property="id", type="number", example=1),
+     *              @OA\Property(property="order_id", type="bigint", example="2"),
+     *              @OA\Property(property="product_id", type="bigint", example="3"),
+     *              @OA\Property(property="cantidad", type="bigint", example="3"),
+     *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
+     *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
+     *         )
+     *     ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="NOT FOUND",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\Cliente] #id"),
+     *          )
+     *      )
+     * )
      */
     public function show(string $id)
     {
         try {
-            // Buscar el registro por ID, omitimos el scope 'visible' si no es necesario
+            // Buscar el registro por ID
             $model = OrdersProducts::findOrFail($id);
 
             // Devolver la respuesta con el modelo encontrado
@@ -87,8 +209,57 @@ class OrdersProductsController extends Controller
 
 
     /**
-     * Update the specified resource in storage
-     */
+ * Actualizar una orden de producto existente
+ * @OA\Put(
+ *     path="/api/v1/ordersproducts/{id}",
+ *     tags={"OrdersProducts"},
+ *     summary="Actualizar una orden de producto",
+ *     description="Actualizar una orden de producto existente en la base de datos",
+ *     operationId="updateOrderProduct",
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *              required={"order_id", "product_id", "cantidad"},
+ *              @OA\Property(property="order_id", type="integer", example=1),
+ *              @OA\Property(property="product_id", type="integer", example=2),
+ *              @OA\Property(property="cantidad", type="integer", example=10)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successful operation",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="id", type="number", example=1),
+ *              @OA\Property(property="order_id", type="bigint", example=1),
+ *              @OA\Property(property="product_id", type="bigint", example=2),
+ *              @OA\Property(property="cantidad", type="int", example=10),
+ *              @OA\Property(property="created_at", type="string", example="2023-02-23T00:09:16.000000Z"),
+ *              @OA\Property(property="updated_at", type="string", example="2023-02-23T12:33:45.000000Z")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="message", type="string", example="The given data was invalid."),
+ *              @OA\Property(property="errors", type="object", example={"order_id": {"The order id field is required."}})
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="message", type="string", example="OrderProduct not found.")
+ *         )
+ *     )
+ * )
+ */
     public function update(UpdateOrderProductRequest $request, string $id)
     {
         // Obtener los datos del request
@@ -115,8 +286,35 @@ class OrdersProductsController extends Controller
 
 
     /**
-     * Remove the specified resource from storage
-     */
+ * Eliminar una orden de producto existente
+ * @OA\Delete(
+ *     path="/api/v1/ordersproducts/{id}",
+ *     tags={"OrdersProducts"},
+ *     summary="Eliminar una orden de producto",
+ *     description="Eliminar una orden de producto existente de la base de datos",
+ *     operationId="deleteOrderProduct",
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Successful operation",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="message", type="string", example="OrderProduct deleted successfully.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *              @OA\Property(property="message", type="string", example="OrderProduct not found.")
+ *         )
+ *     )
+ * )
+ */
     public function destroy(string $id)
     {
         try {
