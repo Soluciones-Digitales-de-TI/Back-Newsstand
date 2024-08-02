@@ -80,7 +80,7 @@ class OrderController extends Controller
         $page = $request->input('page', 1);
 
 
-        $models = Order::active()->paginate($perPage, ['*'], 'page', $page);
+        $models = Order::active()->with('user')->with('products')->paginate($perPage, ['*'], 'page', $page);
 
         $data['models'] = $models->items();
         $data['total'] = $models->total();
