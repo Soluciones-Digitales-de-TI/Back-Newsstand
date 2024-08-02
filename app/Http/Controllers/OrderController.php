@@ -291,7 +291,8 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         try {
-            $model = Order::visible()->find($id)->update(['state' => 3]);
+            $model = Order::visible()->find($id)->update(['status' => 3]);
+            
             return ApiResponseHelper::sendResponse($model, 'Record delete succesful', 200);
         } catch (\Exception $ex) {
             return ApiResponseHelper::rollback($ex);
