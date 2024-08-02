@@ -18,8 +18,8 @@ Route::get('/user', function (Request $request) {
 Route::prefix('v1')->name('api.')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']); // no esta protegidad para registrasr usuario
-    Route::post('/login', [AuthController::class, 'login']); // no esta protegida para loguea
-    
+    Route::post('/login', [AuthController::class, 'login'])->name('login'); // no esta protegida para loguea
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('products', ProductController::class);
