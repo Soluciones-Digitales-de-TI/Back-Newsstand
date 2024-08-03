@@ -173,8 +173,13 @@ return [
     'constans' => [
         'en' => [
             'categories' => [
-                'Café', 'Burgers', 'Pizzas', 'Donuts', 'Cookies'
+                'Café', 'Burgers', 'Pizzas', 'Donuts', 'Cakes', 'Cookies'
             ],
+        ],
+        'es' => [
+            'categories' => [
+                'Café', 'Hamburguesa', 'Pizza', 'Donas', 'Pasteles', 'Galletas',
+            ]
         ]
     ]
 

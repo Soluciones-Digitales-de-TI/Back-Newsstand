@@ -7,6 +7,10 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Post instalación
+
+1. Ejecutar `php artisan init`
+
 ## Instalación
 
 1. Verificar la rama en la que estas actualmente `git branch`

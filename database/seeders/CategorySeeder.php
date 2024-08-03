@@ -13,14 +13,16 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::factory(50)->create();
-        foreach (config('database.constans.en.categories') as $category) {
+        $images = ['cafe', 'hamburguesa', 'pizza', 'dona', 'pastel', 'galletas'];
+        foreach (config('database.constans.es.categories') as $key => $category) {
             Category::factory()->create(
                 [
                     'name' => $category,
+                    'icon' => $images[$key],
                     'state' => 1,
                 ]
             );
         }
+        Category::factory(50)->create();
     }
 }
