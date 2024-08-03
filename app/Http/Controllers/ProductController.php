@@ -17,7 +17,8 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 30);
+        //$perPage = $request->input('per_page', 30);
+        $perPage = $request->input('per_page', 59);
         $page = $request->input('page', 1);
         $models = Product::active()
             ->paginate($perPage, ['*'], 'page', $page) ?? [];
