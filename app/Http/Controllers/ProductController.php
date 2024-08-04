@@ -92,11 +92,10 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         try {
-            $model = Product::visible()->find($id)->update(['state' => 3]);
+            $model = Product::visible()->find($id)->update(['available' => 3]);
             return ApiResponseHelper::sendResponse(null, 'Record deleted succesful', 204);
         } catch (Exception $ex) {
             return ApiResponseHelper::rollback($ex);
         }
     }
 }
-
